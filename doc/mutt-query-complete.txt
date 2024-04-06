@@ -1,0 +1,64 @@
+*muttquerycomplete.txt* *mutt-query-complete*
+
+Completion of e-mail addresses by mutt's query_command for Vim
+===============================================================================
+
+CONTENTS
+========
+
+    1. Usage
+    2. Setup
+    3. Related
+    4. License
+
+INTRODUCTION
+============
+
+This plug-in allows Vim to complete names and email addresses in a mail buffer
+by using the mutt address_query tool defined by `query_command`. This is
+particularly useful when editing emails with `mutt` and `$edit_headers` is
+set.
+
+USAGE
+=====
+
+Consider editing a mail file in Vim with the following content:
+
+    From: Lu Guanqun <guanqun.lu@gmail.com>
+    To:   foo
+
+Assuming your query tool has an entry like:
+
+    foo@bar.com Foo Bar
+
+Place the cursor right after `foo` and press `Ctrl+X Ctrl+U`. The result will
+be:
+
+From: Lu Guanqun <guanqun.lu@gmail.com>
+    To:   Foo Bar foo@bar.com
+
+SETUP
+=====
+
+Completion is enabled by default in all mail buffers. To add additional file
+types to the completion list, modify `g:muttquery_filetypes` which defaults to
+`[ 'mail' ]`.
+
+The mutt query command is set to the value of `$query_command` by default. To
+set a specific command path, add the following to your `.vimrc`:
+
+    let g:muttquery_command = '$command'
+
+For example, `$command` could be mutt_ldap.py %s
+
+For different mail accounts with distinct query commands, use a folder hook in
+`.muttrc`. For account `mailo`, add:
+
+    folder-hook '~/.local/share/mbsync/mailo/' 'source
+    "$XDG_CONFIG_HOME/mutt/accounts/mailo"'
+
+Then, in `"$XDG_CONFIG_HOME/mutt/accounts/mailo"`, configure Vim with
+>
+    set editor = 'vim +"let g:muttquery_command=\"mutt_ldap.py --config
+    \"$XDG_CONFIG_HOME/mutt-ldap/mailo.cfg\" %%s"'
+<
