@@ -23,14 +23,14 @@ function! muttquery#SetMuttQueryCommand() abort
             \ '~/.config/mutt/muttrc', '~/.neomutt/neomuttrc', '~/.neomutt/muttrc', '~/.mutt/neomuttrc',
             \ '~/.mutt/muttrc', '~/.neomuttrc', '~/.muttrc']
       let muttrc_content = []
-      for muttrc in muttrc
+      for muttrc in muttrcs
         if filereadable(expand(muttrc)) | let muttrc_content = readfile(expand(muttrc)) | break | endif
       endfor
 
       for line in muttrc_content
         let query_command = matchstr(line,'\v^\s*set\s+' . 'query_command' . '\s*\=\s*"' . '\zs[^"]+\ze' . '"$')
         if !empty(query_command)
-          let g:muttquery_command = resolve(exepath(query_command))
+          let g:muttquery_command = query_command
           break
         endif
       endfor
