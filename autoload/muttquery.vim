@@ -38,9 +38,10 @@ function! muttquery#SetMuttQueryCommand() abort
   endif
   if empty(g:muttquery_command) ||
         \ !filereadable(exepath(expand(split(g:muttquery_command)[0])))
-    echoerr 'The command ' . g:muttquery_command . ' is no valid executable.'
-    echoerr 'Please set $query_command in ~/.muttrc or g:muttquery_command in ~/.vimrc to a valid executable!'
+    let error_text = 'The command ' . g:muttquery_command . ' is no valid executable. '
+          \ . 'Please set $query_command in ~/.muttrc or g:muttquery_command in ~/.vimrc to a valid executable!'
     let g:muttquery_command = ''
+    echoerr error_text
   endif
 endfunction
 
