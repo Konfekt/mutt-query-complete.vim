@@ -11,7 +11,7 @@ function! muttquery#SetMuttQueryCommand() abort
       silent let output = split(system(mutt . ' -Q "query_command"'), '\n')
 
       for line in output
-        let query_command = matchstr(line, '\v^' . 'query_command' . '\="' . '\zs[^"]+\ze' . '"$')
+        let query_command = matchstr(line, '\v^\s*(set\s+)?' . 'query_command' . '\s*\=\s*"\zs[^"]+\ze"\s*$')
         if !empty(query_command)
           let g:muttquery_command = query_command
           break
