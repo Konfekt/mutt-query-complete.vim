@@ -1,10 +1,11 @@
 " Rc fallback, reached when neither neomutt nor mutt is on PATH.
 " Ok: the matched query_command string is kept, arguments included.
 " Bad: the command is cleared and both error sentences are reported.
+" Run through test/run.sh, or by hand:
 "
 "   HOME=<dir with only ~/.muttrc> MQ_MODE=ok|bad MQ_EXPECT=<command> MQ_OUT=<file> \
 "     PATH=<dir without mutt or neomutt> \
-"     /usr/bin/vim -u NONE -N -n -i NONE -Es -S test/rc-fallback.vim
+"     vim -u NONE -N -n -i NONE -Es -S test/rc-fallback.vim
 
 let s:root = fnamemodify(expand('<sfile>:p'), ':h:h')
 execute 'set runtimepath+=' . fnameescape(s:root)
