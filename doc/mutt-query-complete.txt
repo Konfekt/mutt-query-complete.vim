@@ -36,7 +36,8 @@ Place the cursor right after `foo` and press CTRL-X CTRL-O (see
     From: Lu Guanqun <guanqun.lu@gmail.com>
     To:   "Foo Bar" <foo@bar.com>
 <
-In a `To:`, `Cc:` or `Bcc:` header line, the text to complete runs from the
+In a `From:`, `To:`, `Cc:`, `Bcc:`, `Reply-To:` or `Mail-Followup-To:` header
+line, the text to complete runs from the
 previous `,`, `;` or `:` (skipping blanks) to the cursor, so it may contain
 blanks. Elsewhere it is the word before the cursor.
 
@@ -51,7 +52,7 @@ to `[ 'mail' ]`, before the plug-in is loaded.
                                                         *g:muttquery_command*
 By default, the query command is the value of `$query_command` reported by
 `neomutt -Q query_command` or `mutt -Q query_command`. If neither is
-installed, it is read from the first muttrc found among the usual locations,
+installed, or it reports none, it is read from the first muttrc found among the usual locations,
 such as `~/.config/neomutt/neomuttrc`, `~/.config/mutt/muttrc` and
 `~/.muttrc`. To set a command explicitly, add to your vimrc:
 >
