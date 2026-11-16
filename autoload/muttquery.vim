@@ -24,15 +24,16 @@ function! s:parse(lines) abort
   return ''
 endfunction
 
-" Ask neomutt or mutt for query_command; without either, read the first
-" muttrc found.
+" Ask neomutt or mutt for query_command; without either, or if it reports
+" nothing, for example on an error in the muttrc, read the first muttrc found.
 function! s:detect() abort
-  for mutt in ['neomutt', 'mutt']
-    if executable(mutt)
-      silent let output = systemlist(mutt . ' -Q query_command')
-      return s:parse(output)
+  let mutt = get(filter(['neomutt', 'mutt'], 'executable(v:val)'), 0, '')
+  if !empty(mutt)
+    silent let command = s:parse(systemlist(mutt . ' -Q query_command'))
+    if !empty(command)
+      return command
     endif
-  endfor
+  endif
   for muttrc in s:muttrcs
     if filereadable(expand(muttrc))
       return s:parse(readfile(expand(muttrc)))
@@ -47,7 +48,8 @@ function! muttquery#SetMuttQueryCommand() abort
   endif
   let executable = get(split(g:muttquery_command), 0, '')
   if empty(executable) || !executable(expand(executable))
-    let error_text = 'The command ' . g:muttquery_command . ' is no valid executable. '
+    let error_text = (empty(executable) ? 'No mutt query_command found. '
+          \ : 'The command ' . g:muttquery_command . ' is no valid executable. ')
           \ . 'Please set $query_command in ~/.muttrc or g:muttquery_command in ~/.vimrc to a valid executable!'
     let g:muttquery_command = ''
     echoerr error_text
@@ -67,7 +69,7 @@ endfunction
 function! muttquery#CompleteQuery(findstart, base) abort
   if a:findstart
     let text_before_cursor = strpart(getline('.'), 0, col('.') - 1)
-    if text_before_cursor =~? '\v^%(To|B?cc):'
+    if text_before_cursor =~? '\v^%(%(Reply-|Mail-Followup-)?To|B?cc|From):'
       " in an address line, the query starts after the previous separator
       " and the blanks that follow it
       return match(text_before_cursor, '\v[^,;:[:blank:]][^,;:]*$')

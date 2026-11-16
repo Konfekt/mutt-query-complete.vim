@@ -154,7 +154,7 @@ endfunction
 function! s:TestBlankCommandIsRejected() abort
   let g:muttquery_command = '   '
   let err = s:detect()
-  call s:check(err =~# 'no valid executable', 'error ' . string(err))
+  call s:check(err =~# 'No mutt query_command found', 'error ' . string(err))
   call s:check(g:muttquery_command ==# '', 'cmd ' . string(g:muttquery_command))
 endfunction
 
@@ -221,6 +221,41 @@ endfunction
 function! s:TestRcTrailingBlank() abort
   call s:detect_from_rc(['set query_command="mq-query %s"  '])
   call s:check(g:muttquery_command ==# 'mq-query %s', 'cmd ' . string(g:muttquery_command))
+endfunction
+
+function! s:TestStartInOtherAddressHeaders() abort
+  for header in ['From:', 'Reply-To:', 'Mail-Followup-To:']
+    let line = header . ' a@b.c, Foo Ba'
+    call s:check(s:start(line) == len(header) + 8, header . ' start ' . s:start(line))
+  endfor
+endfunction
+
+function! s:TestFailingMuttFallsBackToRc() abort
+  let home = s:tmp . '/home'
+  call mkdir(home, 'p')
+  call writefile(['set query_command = "mq-query %s"'], home . '/.muttrc')
+  let homedir = $HOME
+  let $HOME = home
+  try
+    let err = s:detect_from_mutt([])
+  finally
+    let $HOME = homedir
+  endtry
+  call s:check(err ==# '', 'error ' . string(err))
+  call s:check(g:muttquery_command ==# 'mq-query %s', 'cmd ' . string(g:muttquery_command))
+endfunction
+
+function! s:TestNothingFoundMessage() abort
+  let g:muttquery_command = ''
+  let err = s:detect()
+  call s:check(err =~# 'No mutt query_command found\.', 'error ' . string(err))
+endfunction
+
+function! s:TestNoFileTypesDefinesNoAutocommand() abort
+  let g:muttquery_filetypes = []
+  execute 'source' fnameescape(s:root . '/plugin/muttquery.vim')
+  call s:check(!exists('#muttquery#FileType'), execute('autocmd muttquery FileType'))
+  unlet g:muttquery_filetypes g:loaded_muttquery
 endfunction
 
 for s:f in sort(filter(map(split(execute('function /_Test'), "\n"),
