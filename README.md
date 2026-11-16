@@ -7,29 +7,30 @@ When you're editing a mail file in Vim that reads
     From: Lu Guanqun <guanqun.lu@gmail.com>
     To:   foo
 ```
-and your query tool has an entry
+and your query tool has an entry (address, a tab, then the name)
 ```
-    foo@bar.com Foo Bar
+    foo@bar.com	Foo Bar
 ```
 and your cursor is right after `foo`, then hit `Ctrl+X Ctrl+O` (which could be remapped, say to `Ctrl-Space`) to obtain:
 ```
     From: Lu Guanqun <guanqun.lu@gmail.com>
-    To:   Foo Bar foo@bar.com
+    To:   "Foo Bar" <foo@bar.com>
 ```
 
 # Setup
 
-Completion is enabled in all mail buffers by default.
+Completion is enabled in all mail buffers by default by setting `'omnifunc'`.
 Add additional file types to the list `g:muttquery_filetypes` which defaults to `[ 'mail' ]`.
 
 The mutt query command is automatically set to the value of the variable `$query_command` used by `mutt`.
 To explicitly set the path to a command `$command`, add to your `.vimrc` the line
 
 ```vim
-  let g:muttquery_command = '$command
+  let g:muttquery_command = '$command'
 ```
 
 For example, `$command` could be [`mutt_ldap.py %s`](https://github.com/wberrier/mutt-ldap/).
+As in `mutt`, the text to complete is shell-quoted and replaces `%s` (quotes around `%s` are dropped), or is appended if the command contains no `%s`.
 
 As a suggestion, if you use different mail accounts with different query commands, add in `.muttrc` a folder hook, say for the account `mailo`,
 
@@ -40,14 +41,20 @@ folder-hook '~/.local/share/mbsync/mailo/' 'source "$XDG_CONFIG_HOME/mutt/accoun
 and in `"$XDG_CONFIG_HOME/mutt/accounts/mailo"` tell Vim about it by
 
 ```
-set editor = 'vim +"let g:muttquery_command=\"mutt_ldap.py --config \"$XDG_CONFIG_HOME/mutt-ldap/mailo.cfg\" %%s'
+set editor = "vim --cmd 'let g:muttquery_command = \"mutt_ldap.py --config $XDG_CONFIG_HOME/mutt-ldap/mailo.cfg %%s\"'"
 ```
 
-# Related:
+(`--cmd` sets the variable before the mail buffer is opened, and `%%` stands for a literal `%` in `$editor`.)
+
+# Related
 
 - The [vim-mutt-aliases](https://github.com/Konfekt/vim-mutt-aliases) plug-in lets you complete e-mail addresses in Vim by those in your `mutt` alias file and (when the alias file is periodically populated by the [mutt-alias.sh](https://github.com/Konfekt/mutt-alias.sh) shell script) gives a more static alternative to this plug-in.
 (Best run by a, say weekly, [(ana)cronjob](https://konfekt.github.io/blog/2016/12/11/sane-cron-setup).)
 - The plugin [vim-notmuch-addrlookup](https://github.com/Konfekt/vim-notmuch-addrlookup) lets you complete e-mail addresses in Vim by those indexed by [notmuch](https://notmuchmail.org).
+
+# Tests
+
+Run `test/run.sh` (optionally followed by the editors to test, such as `vim nvim`); a stand-in query command in `test/bin` replaces a real address book.
 
 # License
 
