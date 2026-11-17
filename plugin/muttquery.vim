@@ -13,9 +13,11 @@ endif
 
 augroup muttquery
   autocmd!
-  exe 'autocmd FileType ' join(g:muttquery_filetypes, ',')
-        \ 'call muttquery#SetMuttQueryCommand() |' .
-        \ 'setlocal omnifunc=muttquery#CompleteQuery'
+  if !empty(g:muttquery_filetypes)
+    exe 'autocmd FileType ' join(g:muttquery_filetypes, ',')
+          \ 'call muttquery#SetMuttQueryCommand() |' .
+          \ 'setlocal omnifunc=muttquery#CompleteQuery'
+  endif
 augroup end
 
 " ------------------------------------------------------------------------------

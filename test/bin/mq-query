@@ -1,0 +1,10 @@
+#!/bin/sh
+# Stand-in for a mutt query_command.
+# Logs each argument on its own line to $MQ_ARGS, then prints a status line
+# followed by the contents of $MQ_RESULTS, as mutt's query protocol expects.
+: > "$MQ_ARGS"
+for arg in "$@"; do
+  printf '%s\n' "$arg" >> "$MQ_ARGS"
+done
+echo 'Searching ...'
+cat "$MQ_RESULTS"

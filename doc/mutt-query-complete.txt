@@ -1,64 +1,91 @@
-*muttquerycomplete.txt* *mutt-query-complete*
+*mutt-query-complete.txt*  Complete e-mail addresses by mutt's query_command
 
-Completion of e-mail addresses by mutt's query_command for Vim
+                                                        *mutt-query-complete*
 ===============================================================================
+CONTENTS                                       *mutt-query-complete-contents*
 
-CONTENTS
-========
+    1. Introduction ........................... |mutt-query-complete-intro|
+    2. Usage .................................. |mutt-query-complete-usage|
+    3. Setup .................................. |mutt-query-complete-setup|
+    4. Related ................................ |mutt-query-complete-related|
+    5. License ................................ |mutt-query-complete-license|
 
-    1. Usage
-    2. Setup
-    3. Related
-    4. License
+===============================================================================
+1. Introduction                                   *mutt-query-complete-intro*
 
-INTRODUCTION
-============
+This plug-in lets Vim complete names and e-mail addresses in a mail buffer by
+the mutt address query tool defined by `query_command`, such as abook,
+notmuch-addrlookup or mutt_ldap.py. This is particularly useful when editing
+e-mails with `mutt` and `$edit_headers` set.
 
-This plug-in allows Vim to complete names and email addresses in a mail buffer
-by using the mutt address_query tool defined by `query_command`. This is
-particularly useful when editing emails with `mutt` and `$edit_headers` is
-set.
-
-USAGE
-=====
+===============================================================================
+2. Usage                                          *mutt-query-complete-usage*
 
 Consider editing a mail file in Vim with the following content:
-
+>
     From: Lu Guanqun <guanqun.lu@gmail.com>
     To:   foo
-
-Assuming your query tool has an entry like:
-
-    foo@bar.com Foo Bar
-
-Place the cursor right after `foo` and press `Ctrl+X Ctrl+U`. The result will
-be:
-
-From: Lu Guanqun <guanqun.lu@gmail.com>
-    To:   Foo Bar foo@bar.com
-
-SETUP
-=====
-
-Completion is enabled by default in all mail buffers. To add additional file
-types to the completion list, modify `g:muttquery_filetypes` which defaults to
-`[ 'mail' ]`.
-
-The mutt query command is set to the value of `$query_command` by default. To
-set a specific command path, add the following to your `.vimrc`:
-
-    let g:muttquery_command = '$command'
-
-For example, `$command` could be mutt_ldap.py %s
-
-For different mail accounts with distinct query commands, use a folder hook in
-`.muttrc`. For account `mailo`, add:
-
-    folder-hook '~/.local/share/mbsync/mailo/' 'source
-    "$XDG_CONFIG_HOME/mutt/accounts/mailo"'
-
-Then, in `"$XDG_CONFIG_HOME/mutt/accounts/mailo"`, configure Vim with
->
-    set editor = 'vim +"let g:muttquery_command=\"mutt_ldap.py --config
-    \"$XDG_CONFIG_HOME/mutt-ldap/mailo.cfg\" %%s"'
 <
+Assume your query tool has an entry (address, a tab, then the name):
+>
+    foo@bar.com	Foo Bar
+<
+Place the cursor right after `foo` and press CTRL-X CTRL-O (see
+|i_CTRL-X_CTRL-O|). The result will be:
+>
+    From: Lu Guanqun <guanqun.lu@gmail.com>
+    To:   "Foo Bar" <foo@bar.com>
+<
+In a `From:`, `To:`, `Cc:`, `Bcc:`, `Reply-To:` or `Mail-Followup-To:` header
+line, the text to complete runs from the
+previous `,`, `;` or `:` (skipping blanks) to the cursor, so it may contain
+blanks. Elsewhere it is the word before the cursor.
+
+===============================================================================
+3. Setup                                          *mutt-query-complete-setup*
+
+                                                      *g:muttquery_filetypes*
+Completion is enabled by default in all mail buffers by setting 'omnifunc'.
+To enable it for more file types, set `g:muttquery_filetypes`, which defaults
+to `[ 'mail' ]`, before the plug-in is loaded.
+
+                                                        *g:muttquery_command*
+By default, the query command is the value of `$query_command` reported by
+`neomutt -Q query_command` or `mutt -Q query_command`. If neither is
+installed, or it reports none, it is read from the first muttrc found among the usual locations,
+such as `~/.config/neomutt/neomuttrc`, `~/.config/mutt/muttrc` and
+`~/.muttrc`. To set a command explicitly, add to your vimrc:
+>
+    let g:muttquery_command = 'mutt_ldap.py %s'
+<
+As in mutt, the text to complete is shell-quoted and replaces `%s` (quotes
+around `%s` are dropped), or is appended if the command contains no `%s`.
+If the first word of the command is no executable, an error is shown and
+`g:muttquery_command` is set to an empty string.
+
+For different mail accounts with distinct query commands, use a folder hook
+in `.muttrc`. For an account `mailo`, add:
+>
+    folder-hook '~/.local/share/mbsync/mailo/' 'source "$XDG_CONFIG_HOME/mutt/accounts/mailo"'
+<
+Then, in `"$XDG_CONFIG_HOME/mutt/accounts/mailo"`, tell Vim about it by:
+>
+    set editor = "vim --cmd 'let g:muttquery_command = \"mutt_ldap.py --config $XDG_CONFIG_HOME/mutt-ldap/mailo.cfg %%s\"'"
+<
+`--cmd` sets the variable before the mail buffer is opened, and `%%` stands
+for a literal `%` in `$editor`.
+
+===============================================================================
+4. Related                                      *mutt-query-complete-related*
+
+- vim-mutt-aliases (https://github.com/Konfekt/vim-mutt-aliases) completes
+  e-mail addresses by those in your mutt alias file.
+- vim-notmuch-addrlookup (https://github.com/Konfekt/vim-notmuch-addrlookup)
+  completes e-mail addresses by those indexed by notmuch.
+
+===============================================================================
+5. License                                      *mutt-query-complete-license*
+
+Distributable under the same terms as Vim itself. See |license|.
+
+ vim:tw=78:ts=8:noet:ft=help:norl:
